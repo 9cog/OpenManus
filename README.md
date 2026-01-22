@@ -148,6 +148,18 @@ use_data_analysis_agent = true     # Disabled by default, change to true to acti
 ```
 In addition, you need to install the relevant dependencies to ensure the agent runs properly: [Detailed Installation Guide](app/tool/chart_visualization/README.md##Installation)
 
+## Streaming API
+
+OpenManus now supports real-time streaming responses! Get progressive updates as your agent executes tasks.
+
+**Quick Example:**
+```python
+async for chunk in agent.run_stream("Your task"):
+    print(f"Step {chunk['step']}: {chunk['content']}")
+```
+
+For detailed documentation, see [Streaming API Guide](docs/STREAMING.md).
+
 ## How to contribute
 
 We welcome any friendly suggestions and helpful contributions! Just create issues or submit pull requests.

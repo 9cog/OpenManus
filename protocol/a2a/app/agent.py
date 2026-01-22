@@ -13,14 +13,51 @@ class ResponseFormat(BaseModel):
 
 
 class A2AManus(Manus):
-    async def invoke(self, query, sessionId) -> str:
-        config = {"configurable": {"thread_id": sessionId}}
+    async def invoke(self, query: str, sessionId: str = None) -> str:
+        """Invoke the agent with a query and return the complete result.
+        
+        Args:
+            query: The user's query/request
+            sessionId: Optional session identifier for tracking
+            
+        Returns:
+            Dict containing task completion status and response content
+        """
+        config = {"configurable": {"thread_id": sessionId}} if sessionId else {}
         response = await self.run(query)
         return self.get_agent_response(config, response)
 
-    async def stream(self, query: str) -> AsyncIterable[Dict[str, Any]]:
-        """Streaming is not supported by Manus."""
-        raise NotImplementedError("Streaming is not supported by Manus yet.")
+    async def stream(self, query: str, sessionId: str = None) -> AsyncIterable[Dict[str, Any]]:
+        """Stream responses from the agent in real-time.
+        
+        Args:
+            query: The user's query/request
+            sessionId: Optional session identifier for tracking
+            
+        Yields:
+            Dict containing streaming updates with type, content, step, and state information
+        """
+        try:
+            async for chunk in self.run_stream(query):
+                # Format the chunk for A2A protocol
+                yield {
+                    "type": chunk.get("type", "update"),
+                    "content": chunk.get("content", ""),
+                    "metadata": {
+                        "step": chunk.get("step", 0),
+                        "state": chunk.get("state", "unknown"),
+                        "sessionId": sessionId,
+                    },
+                }
+        except Exception as e:
+            logger.error(f"Error during streaming: {e}")
+            yield {
+                "type": "error",
+                "content": f"Streaming error: {str(e)}",
+                "metadata": {
+                    "sessionId": sessionId,
+                },
+            }
 
     def get_agent_response(self, config, agent_response):
         return {
