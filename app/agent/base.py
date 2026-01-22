@@ -153,6 +153,89 @@ class BaseAgent(BaseModel, ABC):
         await SANDBOX_CLIENT.cleanup()
         return "\n".join(results) if results else "No steps executed"
 
+    async def run_stream(self, request: Optional[str] = None):
+        """Execute the agent's main loop with streaming output.
+
+        Args:
+            request: Optional initial user request to process.
+
+        Yields:
+            Dict containing step information and results as they become available.
+
+        Raises:
+            RuntimeError: If the agent is not in IDLE state at start.
+        """
+        if self.state != AgentState.IDLE:
+            raise RuntimeError(f"Cannot run agent from state: {self.state}")
+
+        if request:
+            self.update_memory("user", request)
+            yield {
+                "type": "status",
+                "content": f"Processing request: {request[:100]}...",
+                "step": 0,
+                "state": self.state.value,
+            }
+
+        async with self.state_context(AgentState.RUNNING):
+            while (
+                self.current_step < self.max_steps and self.state != AgentState.FINISHED
+            ):
+                self.current_step += 1
+                logger.info(f"Executing step {self.current_step}/{self.max_steps}")
+                
+                yield {
+                    "type": "step_start",
+                    "content": f"Starting step {self.current_step}/{self.max_steps}",
+                    "step": self.current_step,
+                    "state": self.state.value,
+                }
+
+                step_result = await self.step()
+
+                # Check for stuck state
+                if self.is_stuck():
+                    self.handle_stuck_state()
+                    yield {
+                        "type": "warning",
+                        "content": "Detected stuck state, adjusting strategy",
+                        "step": self.current_step,
+                        "state": self.state.value,
+                    }
+
+                yield {
+                    "type": "step_result",
+                    "content": step_result,
+                    "step": self.current_step,
+                    "state": self.state.value,
+                }
+
+            if self.current_step >= self.max_steps:
+                self.current_step = 0
+                self.state = AgentState.IDLE
+                yield {
+                    "type": "terminated",
+                    "content": f"Terminated: Reached max steps ({self.max_steps})",
+                    "step": self.current_step,
+                    "state": self.state.value,
+                }
+            else:
+                yield {
+                    "type": "completed",
+                    "content": "Task completed successfully",
+                    "step": self.current_step,
+                    "state": self.state.value,
+                }
+
+        await SANDBOX_CLIENT.cleanup()
+        
+        yield {
+            "type": "cleanup",
+            "content": "Cleanup completed",
+            "step": self.current_step,
+            "state": self.state.value,
+        }
+
     @abstractmethod
     async def step(self) -> str:
         """Execute a single step in the agent's workflow.
