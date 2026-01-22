@@ -146,12 +146,13 @@ class BaseAgent(BaseModel, ABC):
 
                 results.append(f"Step {self.current_step}: {step_result}")
 
-            # Reset state before exiting context
+            # Record termination message if max steps reached
             if self.current_step >= self.max_steps:
-                self.current_step = 0
                 results.append(f"Terminated: Reached max steps ({self.max_steps})")
         
         # State will be restored to previous state by context manager
+        # Reset all state after context exits
+        self.current_step = 0
         self.state = AgentState.IDLE
         await SANDBOX_CLIENT.cleanup()
         return "\n".join(results) if results else "No steps executed"
@@ -213,23 +214,24 @@ class BaseAgent(BaseModel, ABC):
                     "state": self.state.value,
                 }
 
-            # Determine completion type before exiting context
+            # Determine completion type and save final step before cleanup
+            final_step = self.current_step
             if self.current_step >= self.max_steps:
-                self.current_step = 0
                 completion_type = "terminated"
                 completion_msg = f"Terminated: Reached max steps ({self.max_steps})"
             else:
                 completion_type = "completed"
                 completion_msg = "Task completed successfully"
 
-        # State restored by context manager, explicitly set to IDLE
+        # State restored by context manager, reset counters and explicitly set to IDLE
+        self.current_step = 0
         self.state = AgentState.IDLE
         
-        # Yield completion outside context to ensure proper state
+        # Yield completion with correct final step number
         yield {
             "type": completion_type,
             "content": completion_msg,
-            "step": self.current_step,
+            "step": final_step,
             "state": self.state.value,
         }
 
@@ -238,7 +240,7 @@ class BaseAgent(BaseModel, ABC):
         yield {
             "type": "cleanup",
             "content": "Cleanup completed",
-            "step": self.current_step,
+            "step": final_step,
             "state": self.state.value,
         }
 
