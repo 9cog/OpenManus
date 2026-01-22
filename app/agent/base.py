@@ -146,10 +146,13 @@ class BaseAgent(BaseModel, ABC):
 
                 results.append(f"Step {self.current_step}: {step_result}")
 
+            # Reset state before exiting context
             if self.current_step >= self.max_steps:
                 self.current_step = 0
-                self.state = AgentState.IDLE
                 results.append(f"Terminated: Reached max steps ({self.max_steps})")
+        
+        # State will be restored to previous state by context manager
+        self.state = AgentState.IDLE
         await SANDBOX_CLIENT.cleanup()
         return "\n".join(results) if results else "No steps executed"
 
@@ -210,22 +213,25 @@ class BaseAgent(BaseModel, ABC):
                     "state": self.state.value,
                 }
 
+            # Determine completion type before exiting context
             if self.current_step >= self.max_steps:
                 self.current_step = 0
-                self.state = AgentState.IDLE
-                yield {
-                    "type": "terminated",
-                    "content": f"Terminated: Reached max steps ({self.max_steps})",
-                    "step": self.current_step,
-                    "state": self.state.value,
-                }
+                completion_type = "terminated"
+                completion_msg = f"Terminated: Reached max steps ({self.max_steps})"
             else:
-                yield {
-                    "type": "completed",
-                    "content": "Task completed successfully",
-                    "step": self.current_step,
-                    "state": self.state.value,
-                }
+                completion_type = "completed"
+                completion_msg = "Task completed successfully"
+
+        # State restored by context manager, explicitly set to IDLE
+        self.state = AgentState.IDLE
+        
+        # Yield completion outside context to ensure proper state
+        yield {
+            "type": completion_type,
+            "content": completion_msg,
+            "step": self.current_step,
+            "state": self.state.value,
+        }
 
         await SANDBOX_CLIENT.cleanup()
         

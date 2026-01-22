@@ -53,10 +53,9 @@ class TestStreamingReturnTypes:
         # Should have request parameter
         assert 'request' in sig.parameters
         
-        # Should be optional (has default)
-        assert sig.parameters['request'].default is not inspect.Parameter.empty or \
-               sig.parameters['request'].annotation.__origin__ is type(None).__class__ or \
-               'Optional' in str(sig.parameters['request'].annotation)
+        # Should be optional (has default value)
+        param = sig.parameters['request']
+        assert param.default is not inspect.Parameter.empty, "request parameter should have a default value"
     
     def test_a2a_stream_signature(self):
         """Verify A2A stream has correct signature."""
