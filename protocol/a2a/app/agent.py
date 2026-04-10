@@ -3,6 +3,7 @@ from typing import Any, AsyncIterable, ClassVar, Dict, List, Literal
 from pydantic import BaseModel
 
 from app.agent.manus import Manus
+from app.logger import logger
 
 
 class ResponseFormat(BaseModel):

@@ -9,7 +9,7 @@ from app.schema import AgentState
 class MockAgent(BaseAgent):
     """Mock agent for testing."""
 
-    name = "test_agent"
+    name: str = "test_agent"
     
     async def step(self) -> str:
         """Mock step implementation."""
