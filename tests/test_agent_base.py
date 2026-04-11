@@ -293,7 +293,9 @@ class TestIsStuck:
 
     def test_handle_stuck_state_updates_prompt(self):
         agent = SimpleAgent()
+        original_prompt = agent.next_step_prompt
         agent.handle_stuck_state()
+        assert agent.next_step_prompt != original_prompt
         assert "duplicate" in agent.next_step_prompt.lower()
 
 
