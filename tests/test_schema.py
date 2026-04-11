@@ -1,16 +1,7 @@
 """Comprehensive tests for app/schema.py — data models."""
 import pytest
-from pydantic import ValidationError
 
-from app.schema import (
-    AgentState,
-    Function,
-    Memory,
-    Message,
-    Role,
-    ToolCall,
-    ToolChoice,
-)
+from app.schema import AgentState, Function, Memory, Message, Role, ToolCall, ToolChoice
 
 
 # ---------------------------------------------------------------------------

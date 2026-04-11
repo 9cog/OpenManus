@@ -1,9 +1,8 @@
 """Comprehensive tests for app/agent/base.py — BaseAgent."""
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.agent.base import BaseAgent
-from app.schema import AgentState, Message, Memory
+from app.schema import AgentState, Message
 
 
 # ---------------------------------------------------------------------------
@@ -79,9 +78,7 @@ class TestAgentStateContext:
         with pytest.raises(ValueError):
             import asyncio
 
-            asyncio.get_event_loop().run_until_complete(
-                _use_invalid_state(agent)
-            )
+            asyncio.get_event_loop().run_until_complete(_use_invalid_state(agent))
 
 
 async def _use_invalid_state(agent):
@@ -113,9 +110,7 @@ class TestUpdateMemory:
 
     def test_tool_message_added(self):
         agent = SimpleAgent()
-        agent.update_memory(
-            "tool", "result", tool_call_id="call_1", name="some_tool"
-        )
+        agent.update_memory("tool", "result", tool_call_id="call_1", name="some_tool")
         msg = agent.memory.messages[0]
         assert msg.role == "tool"
         assert msg.tool_call_id == "call_1"
@@ -298,7 +293,6 @@ class TestIsStuck:
 
     def test_handle_stuck_state_updates_prompt(self):
         agent = SimpleAgent()
-        original_prompt = agent.next_step_prompt
         agent.handle_stuck_state()
         assert "duplicate" in agent.next_step_prompt.lower()
 

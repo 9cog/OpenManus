@@ -1,9 +1,8 @@
 """Tests for app/flow/planning.py — PlanningFlow and PlanStepStatus."""
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.agent.base import BaseAgent
-from app.flow.planning import PlanStepStatus, PlanningFlow
+from app.flow.planning import PlanningFlow, PlanStepStatus
 from app.schema import AgentState
 from app.tool.planning import PlanningTool
 

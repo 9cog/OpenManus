@@ -12,9 +12,13 @@ def _docker_available() -> bool:
     """Return True only when the real Docker socket is reachable."""
     try:
         import importlib
+
         real_docker = importlib.import_module("docker")
         # If we got a MagicMock instead of the real package, docker is not available
-        if not hasattr(real_docker, "from_env") or callable(real_docker.from_env) is False:
+        if (
+            not hasattr(real_docker, "from_env")
+            or callable(real_docker.from_env) is False
+        ):
             return False
         client = real_docker.from_env()
         client.ping()
