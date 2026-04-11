@@ -13,9 +13,9 @@ class TestStreamingInterface:
         # Check the method exists
         assert hasattr(BaseAgent, 'run_stream')
         
-        # Check it's an async method
+        # run_stream is an async generator (uses yield), so check accordingly
         import inspect
-        assert inspect.iscoroutinefunction(BaseAgent.run_stream)
+        assert inspect.isasyncgenfunction(BaseAgent.run_stream)
     
     def test_a2a_agent_has_stream_method(self):
         """Verify A2AManus has stream method."""
@@ -24,9 +24,9 @@ class TestStreamingInterface:
         # Check the method exists
         assert hasattr(A2AManus, 'stream')
         
-        # Check it's an async method
+        # stream is an async generator (uses yield), so check accordingly
         import inspect
-        assert inspect.iscoroutinefunction(A2AManus.stream)
+        assert inspect.isasyncgenfunction(A2AManus.stream)
     
     def test_stream_method_not_raising_notimplemented(self):
         """Verify stream method no longer raises NotImplementedError."""

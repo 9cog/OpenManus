@@ -109,9 +109,15 @@ class BaseAgent(BaseModel, ABC):
         if role not in message_map:
             raise ValueError(f"Unsupported message role: {role}")
 
-        # Create message with appropriate parameters based on role
-        kwargs = {"base64_image": base64_image, **(kwargs if role == "tool" else {})}
-        self.memory.add_message(message_map[role](content, **kwargs))
+        # Build role-specific kwargs.  system_message does not accept
+        # base64_image, so only forward it for the roles that support images.
+        image_capable_roles = {"user", "assistant", "tool"}
+        msg_kwargs: dict = {}
+        if base64_image is not None and role in image_capable_roles:
+            msg_kwargs["base64_image"] = base64_image
+        if role == "tool":
+            msg_kwargs.update(kwargs)
+        self.memory.add_message(message_map[role](content, **msg_kwargs))
 
     async def run(self, request: Optional[str] = None) -> str:
         """Execute the agent's main loop asynchronously.
