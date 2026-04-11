@@ -1,6 +1,5 @@
 """Tests for app/tool/tool_collection.py — ToolCollection."""
 import pytest
-from unittest.mock import AsyncMock
 
 from app.exceptions import ToolError
 from app.tool.base import BaseTool, ToolFailure, ToolResult

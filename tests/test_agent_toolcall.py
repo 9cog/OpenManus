@@ -1,13 +1,10 @@
 """Tests for app/agent/toolcall.py — ToolCallAgent."""
 import json
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.agent.toolcall import ToolCallAgent
 from app.schema import AgentState, Function, ToolCall
-from app.tool.base import ToolResult
-from app.tool.terminate import Terminate
-from app.tool.tool_collection import ToolCollection
 
 
 # ---------------------------------------------------------------------------

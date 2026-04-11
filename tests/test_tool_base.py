@@ -1,7 +1,7 @@
 """Tests for app/tool/base.py — BaseTool, ToolResult, CLIResult, ToolFailure."""
 import json
+
 import pytest
-from unittest.mock import AsyncMock
 
 from app.tool.base import BaseTool, CLIResult, ToolFailure, ToolResult
 

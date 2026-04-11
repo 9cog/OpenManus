@@ -1,10 +1,8 @@
 """Tests for app/flow/base.py — BaseFlow."""
 import pytest
-from unittest.mock import AsyncMock
 
 from app.agent.base import BaseAgent
 from app.flow.base import BaseFlow
-from app.schema import AgentState
 
 
 # ---------------------------------------------------------------------------
@@ -66,9 +64,7 @@ class TestBaseFlowCreation:
     def test_explicit_primary_agent_key(self):
         a1 = _SimpleAgent()
         a2 = _SimpleAgent()
-        flow = _SimpleFlow(
-            agents={"a": a1, "b": a2}, primary_agent_key="b"
-        )
+        flow = _SimpleFlow(agents={"a": a1, "b": a2}, primary_agent_key="b")
         assert flow.primary_agent is a2
 
 

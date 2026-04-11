@@ -126,9 +126,7 @@ class TestUpdatePlan:
     async def test_update_nonexistent_plan_raises(self):
         tool = make_tool()
         with pytest.raises(ToolError):
-            await tool.execute(
-                command="update", plan_id="ghost", title="Nope"
-            )
+            await tool.execute(command="update", plan_id="ghost", title="Nope")
 
     @pytest.mark.asyncio
     async def test_update_without_plan_id_raises(self):
@@ -373,7 +371,10 @@ class TestFormatPlan:
         tool = make_tool()
         await _create_basic_plan(tool)
         await tool.execute(
-            command="mark_step", plan_id="plan1", step_index=0, step_status="in_progress"
+            command="mark_step",
+            plan_id="plan1",
+            step_index=0,
+            step_status="in_progress",
         )
         await tool.execute(
             command="mark_step", plan_id="plan1", step_index=1, step_status="blocked"

@@ -1,6 +1,5 @@
 """Tests for app/agent/react.py — ReActAgent."""
 import pytest
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from app.agent.react import ReActAgent
 from app.schema import AgentState
